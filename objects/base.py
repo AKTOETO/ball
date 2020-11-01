@@ -1,7 +1,7 @@
 import pygame
 
 
-class DrawableObject():
+class DrawableObject:
     def __init__(self, game):
         self.game = game
         self.rect = pygame.rect.Rect(0, 0, 0, 0)
