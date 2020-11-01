@@ -19,20 +19,11 @@ class BallObject(ImageObject):
             get_nonzero_random_value(BallObject.max_speed)
         ]
 
-    #def collides_with(self, other):
-    #    return pygame.sprite.collide_circle(self, other)
-
-    #def bounce(self, other):
-    #    self.speed, other.speed = other.speed, self.speed
-
     def vertical_edge_collision(self):
         return self.rect.right >= self.game.width or self.rect.left <= 0
 
     def horisontal_edge_collision(self):
         return self.rect.bottom >= self.game.height or self.rect.top <= 0
-
-    # def edge_collision(self):
-    #    return self.horisontal_edge_collision() or self.vertical_edge_collision()
 
     def check_borders(self):
         if self.vertical_edge_collision():

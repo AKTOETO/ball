@@ -1,27 +1,32 @@
-from random import randint
+from random import *
 
 import pygame
+import time
 
+from constants import *
 from objects.ball import BallObject
+from objects.platform import PlatformObject
 from objects.text import TextObject
 from scenes.base import BaseScene
-from objects.platform import PlatformObject
 
 
 class GameScene(BaseScene):
     max_collisions = 15
     balls_count = 1
-    collision_tolerance = 4
+    collision_tolerance = 6
+    standart_speed = randrange(2, 3)
 
     def __init__(self, game):
         super().__init__(game)
-        self.platform = PlatformObject(game)
-        self.balls = [BallObject(game) for _ in range(GameScene.balls_count)]
+        self.start_time = time.time()
+        self.platform = PlatformObject(game, speed=GameScene.standart_speed)
+        self.balls = [BallObject(game, speed=[GameScene.standart_speed, GameScene.standart_speed])
+                      for _ in range(GameScene.balls_count)]
         self.collision_count = 0
-        # self.status_text = TextObject(self.game, 0, 0, self.get_collisions_text(), (255, 255, 255))
-        # self.status_text.move(10, 10)
+        self.score_text = TextObject(self.game, 0, 0, self.get_score_text(), ORANGE)
+        self.score_text.move(10, 10)
         self.objects += self.balls
-        # self.objects.append(self.status_text)
+        self.objects.append(self.score_text)
         self.objects.append(self.platform)
         self.reset_balls_position()
 
@@ -32,8 +37,15 @@ class GameScene(BaseScene):
             elif event.key == pygame.K_a or event.key == pygame.K_d:
                 self.platform.process_event(event)
 
+    def update_score(self):
+        self.score_text.update_text(self.get_score_text())
+        self.score_text.move(10, 10)
+
+    def get_score_text(self):
+        return f'Score: {int(time.time() - self.start_time)} seconds'
+
     def get_random_position(self, radius):
-        return randint(10, self.game.width - radius*2 - 10), randint(10, self.game.height - radius*2 - 10)
+        return randint(10, self.game.width - radius * 2 - 10), randint(10, self.game.height - radius * 2 - 10)
 
     def set_random_position(self, ball):
         pos = self.get_random_position(ball.radius)
@@ -54,36 +66,20 @@ class GameScene(BaseScene):
         self.collision_count = 0
         self.reset_balls_position()
         self.set_random_unique_position()
-        # self.status_text.update_text(self.get_collisions_text())
-        # self.status_text.move(10, 10)
-
-    #def check_ball_intercollisions(self):
-    #    for i in range(len(self.balls) - 1):
-    #        for j in range(i + 1, len(self.balls)):
-    #            if self.balls[i].collides_with(self.balls[j]):
-    #                self.balls[i].bounce(self.balls[j])
+        self.score_text.update_text(self.get_score_text())
+        self.score_text.move(10, 10)
 
     def collide_platform_with_ball(self):
         if self.platform.rect.colliderect(self.balls[0].rect):
-            if abs(self.balls[0].rect.bottom - self.platform.rect.top) < GameScene.collision_tolerance and\
+            if abs(self.balls[0].rect.bottom - self.platform.rect.top) < GameScene.collision_tolerance and \
                     self.balls[0].speed[1] > 0:
                 self.balls[0].speed[1] *= -1
-            elif abs(self.balls[0].rect.left - self.platform.rect.right) < GameScene.collision_tolerance and\
+            elif abs(self.balls[0].rect.left - self.platform.rect.right) < GameScene.collision_tolerance and \
                     self.balls[0].speed[0] < 0:
                 self.balls[0].speed[0] *= -1
-            elif abs(self.balls[0].rect.right - self.platform.rect.left) < GameScene.collision_tolerance and\
+            elif abs(self.balls[0].rect.right - self.platform.rect.left) < GameScene.collision_tolerance and \
                     self.balls[0].speed[0] > 0:
                 self.balls[0].speed[0] *= -1
-
-    #def get_collisions_text(self):
-    #    return 'Wall collisions: {}/{}'.format(self.collision_count, GameScene.max_collisions)
-
-    #def check_ball_edge_collision(self):
-    #    for ball in self.balls:
-    #        if ball.edge_collision():
-    #            self.collision_count += 1
-    #            self.status_text.update_text(self.get_collisions_text())
-    #            self.status_text.move(10, 10)
 
     def check_game_over(self):
         if self.balls[0].rect.bottom >= self.game.height:
@@ -92,6 +88,5 @@ class GameScene(BaseScene):
     def process_logic(self):
         super().process_logic()
         self.collide_platform_with_ball()
-        #self.check_ball_intercollisions()
-        #self.check_ball_edge_collision()
+        self.update_score()
         self.check_game_over()
