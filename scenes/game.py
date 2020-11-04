@@ -16,6 +16,7 @@ class GameScene(BaseScene):
     balls_count = 1
     collision_tolerance = 6
     standart_speed = randrange(2, 3)
+    accelerate = 1.15
 
     def __init__(self, game):
         super().__init__(game)
@@ -78,13 +79,13 @@ class GameScene(BaseScene):
         if self.platform.rect.colliderect(self.balls[0].rect):
             if abs(self.balls[0].rect.bottom - self.platform.rect.top) < GameScene.collision_tolerance and \
                     self.balls[0].speed[1] > 0:
-                self.balls[0].speed[1] *= -1
+                self.balls[0].speed[1] *= -GameScene.accelerate
             elif abs(self.balls[0].rect.left - self.platform.rect.right) < GameScene.collision_tolerance and \
                     self.balls[0].speed[0] < 0:
-                self.balls[0].speed[0] *= -1
-            elif abs(self.balls[0].rect.right - self.platform.rect.left) < GameScene.collision_tolerance and \
+                self.balls[0].speed[0] *= -GameScene.accelerate
+            elif abs(self.balls[0].rect.right - self.platform.rect.left) < GameScene.collision_tolerance and\
                     self.balls[0].speed[0] > 0:
-                self.balls[0].speed[0] *= -1
+                self.balls[0].speed[0] *= -GameScene.accelerate
 
     def check_game_over(self):
         if self.balls[0].rect.bottom >= self.game.height:
