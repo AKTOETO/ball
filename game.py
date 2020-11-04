@@ -14,6 +14,7 @@ class Game:
     current_scene_index = SCENE_MENU
 
     def __init__(self):
+        self.fileul = None
         self.screen = pygame.display.set_mode(self.size)
         self.scenes = [
             MenuScene(self),

@@ -8,6 +8,7 @@ from objects.ball import BallObject
 from objects.platform import PlatformObject
 from objects.text import TextObject
 from scenes.base import BaseScene
+from fileuploader import FileUploader
 
 
 class GameScene(BaseScene):
@@ -41,8 +42,11 @@ class GameScene(BaseScene):
         self.score_text.update_text(self.get_score_text())
         self.score_text.move(10, 10)
 
+    def get_score(self):
+        return int(time.time() - self.start_time)
+
     def get_score_text(self):
-        return f'Score: {int(time.time() - self.start_time)} seconds'
+        return f'Score: {self.get_score()} seconds'
 
     def get_random_position(self, radius):
         return randint(10, self.game.width - radius * 2 - 10), randint(10, self.game.height - radius * 2 - 10)
@@ -63,6 +67,7 @@ class GameScene(BaseScene):
                 self.set_random_position(self.balls[index])
 
     def on_activate(self):
+        self.start_time = time.time()
         self.collision_count = 0
         self.reset_balls_position()
         self.set_random_unique_position()
@@ -83,7 +88,10 @@ class GameScene(BaseScene):
 
     def check_game_over(self):
         if self.balls[0].rect.bottom >= self.game.height:
+            self.game.fileul.set_score(self.get_score())
+            self.game.fileul.write_file_data()
             self.game.set_scene(self.game.SCENE_GAMEOVER)
+            self.start_time = 0
 
     def process_logic(self):
         super().process_logic()

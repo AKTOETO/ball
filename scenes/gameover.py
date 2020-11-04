@@ -1,34 +1,41 @@
 from datetime import datetime
 
+from constants import RED
+from objects.button import ButtonObject
+from objects.frame import Frame
+from objects.table import Table
 from objects.text import TextObject
 from scenes.base import BaseScene
 
 
 class GameOverScene(BaseScene):
-    text_format = 'Game over ({})'
-    seconds_to_end = 3
+    text_format = 'Game over'
 
     def __init__(self, game):
         super().__init__(game)
-        self.last_seconds_passed = 0
-        self.text = TextObject(self.game, self.game.width // 2, self.game.height // 2, self.get_gameover_text_formatted(), (255, 255, 255))
+        self.table = Table(game)
+        self.gomenu = False
+        self.objects.append(
+            ButtonObject(
+                self.game, self.game.width - 150, self.game.height - 100, 100, 50,
+                RED, self.go_menu, text='MENU'
+            )
+        )
+        self.text = TextObject(self.game, self.game.width // 2, self.game.height // 5, self.get_gameover_text_formatted(), (255, 255, 255))
         self.objects.append(self.text)
-        self.update_start_time()
-
-    def get_gameover_text_formatted(self):
-        return self.text_format.format(self.seconds_to_end - self.last_seconds_passed)
+        self.objects.append(self.table)
 
     def on_activate(self):
-        self.update_start_time()
-
-    def update_start_time(self):
-        self.time_start = datetime.now()
+        self.gomenu = False
 
     def process_logic(self):
-        time_current = datetime.now()
-        seconds_passed = (time_current - self.time_start).seconds
-        if self.last_seconds_passed != seconds_passed:
-            self.last_seconds_passed = seconds_passed
-            self.objects[0].update_text(self.get_gameover_text_formatted())
-        if seconds_passed >= self.seconds_to_end:
+        super().process_logic()
+        if self.gomenu:
             self.game.set_scene(self.game.SCENE_MENU)
+
+    def go_menu(self):
+        self.gomenu = True
+        pass
+
+    def get_gameover_text_formatted(self):
+        return GameOverScene.text_format
